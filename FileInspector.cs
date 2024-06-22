@@ -44,7 +44,14 @@ namespace filemeta
                     break;
                 case 4:
                     var was4 = choices[choiceIndex];
-                    fi.IsReadOnly = PromptBool(was4.Name, was4.Value);
+                    var newValue = PromptBool(was4.Name, was4.Value);
+                    if (fi.IsReadOnly == newValue)
+                    {
+                        AnsiConsole.MarkupLineInterpolated($"No change of {nameof(fi.IsReadOnly)}");
+                        break;
+                    }
+
+                    fi.IsReadOnly = newValue;
                     AnsiConsole.MarkupLineInterpolated($"Changed {nameof(fi.IsReadOnly)} to {fi.IsReadOnly}");
                     break;
                 default:
