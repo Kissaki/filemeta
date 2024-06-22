@@ -10,41 +10,35 @@ namespace filemeta
         public static int Run(FileInfo fi)
         {
             var choices = GetAttributes(fi).ToArray();
-            var choicesStr = choices.Select(x => string.Join(" ", x.Name, x.Value)).ToArray();
-            var choice = AnsiConsole.Prompt(new SelectionPrompt<string>()
+            var choice = AnsiConsole.Prompt(new SelectionPrompt<FileAttribute>()
                 .Title($"File {fi.Name} Attributes")
-                .AddChoices(choicesStr)
+                .AddChoices(choices)
+                .UseConverter(x => $"{x.Key} {x.Value}")
                 );
-            var choiceIndex = Array.FindIndex(choicesStr, x => x == choice);
 
-            switch (choiceIndex)
+            switch (choice.Key)
             {
-                case 0:
-                    var was0 = choices[choiceIndex];
-                    var newFileName = PromptFileName(was0.Name, was0.Value);
+                case FileAttributes.FileName:
+                    var newFileName = PromptFileName(choice.Key.ToString(), choice.Value);
                     var newFilePath = Path.Combine(fi.DirectoryName ?? throw new NotImplementedException("Non-directory file paths are not supported for rename"), newFileName);
                     fi.MoveTo(newFilePath);
                     var newFileInfo = new FileInfo(newFilePath);
                     AnsiConsole.MarkupLineInterpolated($"Changed {nameof(newFileInfo.Name)} to {newFileInfo.Name}");
                     break;
-                case 1:
-                    var was1 = choices[choiceIndex];
-                    fi.CreationTime = PromptDateTime(was1.Name, was1.Value);
+                case FileAttributes.CreationTime:
+                    fi.CreationTime = PromptDateTime(choice.Key.ToString(), choice.Value);
                     AnsiConsole.MarkupLineInterpolated($"Changed {nameof(fi.CreationTime)} to {fi.CreationTime}");
                     break;
-                case 2:
-                    var was2 = choices[choiceIndex];
-                    fi.LastAccessTime = PromptDateTime(was2.Name, was2.Value);
+                case FileAttributes.LastAccessTime:
+                    fi.LastAccessTime = PromptDateTime(choice.Key.ToString(), choice.Value);
                     AnsiConsole.MarkupLineInterpolated($"Changed {nameof(fi.LastAccessTime)} to {fi.LastAccessTime}");
                     break;
-                case 3:
-                    var was3 = choices[choiceIndex];
-                    fi.LastWriteTime = PromptDateTime(was3.Name, was3.Value);
+                case FileAttributes.LastWriteTime:
+                    fi.LastWriteTime = PromptDateTime(choice.Key.ToString(), choice.Value);
                     AnsiConsole.MarkupLineInterpolated($"Changed {nameof(fi.LastWriteTime)} to {fi.LastWriteTime}");
                     break;
-                case 4:
-                    var was4 = choices[choiceIndex];
-                    var newValue = PromptBool(was4.Name, was4.Value);
+                case FileAttributes.IsReadOnly:
+                    var newValue = PromptBool(choice.Key.ToString(), choice.Value);
                     if (fi.IsReadOnly == newValue)
                     {
                         AnsiConsole.MarkupLineInterpolated($"No change of {nameof(fi.IsReadOnly)}");
@@ -61,13 +55,16 @@ namespace filemeta
             return 0;
         }
 
-        public static IEnumerable<(string Name, string Value)> GetAttributes(FileInfo fi)
+        private enum FileAttributes { FileName, CreationTime, LastAccessTime, LastWriteTime, IsReadOnly, }
+        private record FileAttribute(FileAttributes Key, string Value);
+
+        private static IEnumerable<FileAttribute> GetAttributes(FileInfo fi)
         {
-            yield return ("FileName", fi.Name);
-            yield return ("CreationTime", fi.CreationTime.ToString(DateTimeFormat));
-            yield return ("LastAccessTime", fi.LastAccessTime.ToString(DateTimeFormat));
-            yield return ("LastWriteTime", fi.LastWriteTime.ToString(DateTimeFormat));
-            yield return ("IsReadOnly", fi.IsReadOnly ? "yes" : "no");
+            yield return new(FileAttributes.FileName, fi.Name);
+            yield return new(FileAttributes.CreationTime, fi.CreationTime.ToString(DateTimeFormat));
+            yield return new(FileAttributes.LastAccessTime, fi.LastAccessTime.ToString(DateTimeFormat));
+            yield return new(FileAttributes.LastWriteTime, fi.LastWriteTime.ToString(DateTimeFormat));
+            yield return new(FileAttributes.IsReadOnly, fi.IsReadOnly ? "yes" : "no");
         }
 
         //public static IEnumerable<FileAttributes> GetAttributes2(FileInfo fi)
