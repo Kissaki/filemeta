@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "filemeta": {
+      "commandName": "Project",
+      "commandLineArgs": "filemeta.runtimeconfig.json"
+    }
+  }
+}
