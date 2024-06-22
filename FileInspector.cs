@@ -56,7 +56,7 @@ internal static class FileInspector
     }
 
     private enum FileAttributes { FileName, CreationTime, LastAccessTime, LastWriteTime, IsReadOnly, }
-    private record FileAttribute(FileAttributes Key, string Value);
+    private sealed record FileAttribute(FileAttributes Key, string Value);
 
     private static IEnumerable<FileAttribute> GetAttributes(FileInfo fi)
     {
