@@ -10,7 +10,7 @@ namespace filemeta
         public static int Run(FileInfo fi)
         {
             var choices = GetAttributes(fi).ToArray();
-            var choicesStr = choices.Select(x => string.Join("", x.Name, x.Value)).ToArray();
+            var choicesStr = choices.Select(x => string.Join(" ", x.Name, x.Value)).ToArray();
             var choice = AnsiConsole.Prompt(new SelectionPrompt<string>()
                 .Title($"File {fi.Name} Attributes")
                 .AddChoices(choicesStr)
