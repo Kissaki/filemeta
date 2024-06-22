@@ -1,9 +1,54 @@
-﻿namespace filemeta
+﻿using static filemeta.PromptSpecifics;
+
+namespace filemeta
 {
     internal static class FileInspector
     {
         // Opinionated format overriding user system setting
         public static string DateTimeFormat { get; set; } = "yyyy-MM-dd HH:mm:ss";
+
+        public static int Run(FileInfo fi)
+        {
+            var choices = GetAttributes(fi).ToArray();
+            var choicesStr = choices.Select(x => string.Join("", x.Name, x.Value)).ToArray();
+            var choice = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                .Title($"File {fi.Name} Attributes")
+                .AddChoices(choicesStr)
+                );
+            var choiceIndex = Array.FindIndex(choicesStr, x => x == choice);
+
+            switch (choiceIndex)
+            {
+                case 0:
+                    var was0 = choices[choiceIndex];
+                    fi.MoveTo(PromptFileName(was0.Name, was0.Value));
+                    break;
+                case 1:
+                    var was1 = choices[choiceIndex];
+                    fi.CreationTime = PromptDateTime(was1.Name, was1.Value);
+                    AnsiConsole.MarkupLineInterpolated($"Changed {nameof(fi.CreationTime)} to {fi.CreationTime}");
+                    break;
+                case 2:
+                    var was2 = choices[choiceIndex];
+                    fi.LastAccessTime = PromptDateTime(was2.Name, was2.Value);
+                    AnsiConsole.MarkupLineInterpolated($"Changed {nameof(fi.LastAccessTime)} to {fi.LastAccessTime}");
+                    break;
+                case 3:
+                    var was3 = choices[choiceIndex];
+                    fi.LastWriteTime = PromptDateTime(was3.Name, was3.Value);
+                    AnsiConsole.MarkupLineInterpolated($"Changed {nameof(fi.LastWriteTime)} to {fi.LastWriteTime}");
+                    break;
+                case 4:
+                    var was4 = choices[choiceIndex];
+                    fi.IsReadOnly = PromptBool(was4.Name, was4.Value);
+                    AnsiConsole.MarkupLineInterpolated($"Changed {nameof(fi.IsReadOnly)} to {fi.IsReadOnly}");
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
+
+            return 0;
+        }
 
         public static IEnumerable<(string Name, string Value)> GetAttributes(FileInfo fi)
         {
