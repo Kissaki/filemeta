@@ -2,7 +2,42 @@
 {
     internal static class FileInspector
     {
+        // Opinionated format overriding user system setting
+        public static string DateTimeFormat { get; set; } = "yyyy-MM-dd HH:mm:ss";
+
+        public static IEnumerable<(string Name, string Value)> GetAttributes(FileInfo fi)
+        {
+            yield return ("FileName", fi.Name);
+            yield return ("CreationTime", fi.CreationTime.ToString(DateTimeFormat));
+            yield return ("LastAccessTime", fi.LastAccessTime.ToString(DateTimeFormat));
+            yield return ("LastWriteTime", fi.LastWriteTime.ToString(DateTimeFormat));
+            yield return ("IsReadOnly", fi.IsReadOnly ? "yes" : "no");
+        }
+
+        //public static IEnumerable<FileAttributes> GetAttributes2(FileInfo fi)
+        //{
+        //    yield return new FileStringAttribute("FileName", fi.Name, (fi, v) => fi.Name = v);
+        //    yield return ("FileName", fi.Name);
+        //    yield return ("CreationTime", fi.CreationTime.ToString(DateTimeFormat));
+        //    yield return ("LastAccessTime", fi.LastAccessTime.ToString(DateTimeFormat));
+        //    yield return ("LastWriteTime", fi.LastWriteTime.ToString(DateTimeFormat));
+        //    yield return ("IsReadOnly", fi.IsReadOnly ? "yes" : "no");
+        //}
+
+        //public record FileStringAttribute(string Name, string Value, Action<FileInfo, string> Setter);
+        //public record FileBoolAttribute(string Name, string Value, Action<FileInfo, bool> Setter);
+        //public record FileDateTimeAttribute(string Name, string Value, Action<FileInfo, DateTime> Setter);
+
+        public static IEnumerable<(string Name, string Value)> GetReadOnlyAttributes(FileInfo fi, bool includeUnset = false)
+        {
+            if (includeUnset || fi.LinkTarget != null) yield return ("LinkTarget", fi.LinkTarget ?? "<unset>");
+
+            yield return ("Length", fi.Length.ToString());
+            yield return ("UnixFileMode", fi.UnixFileMode.ToString());
+        }
+
         /// <returns>success</returns>
+        [Obsolete]
         public static bool OpenFileInfo(FileInfo fi, CancellationToken? cToken1)
         {
             if (fi.IsReadOnly)
@@ -46,28 +81,29 @@
             return true;
         }
 
+        [Obsolete]
         public static void WriteFileMeta(FileInfo fi)
         {
-            Console.WriteLine($"File {fi.Name}:");
-            Console.WriteLine($"  [C]reationTime  : {fi.CreationTime}");
-            Console.WriteLine($"  Last[A]ccessTime: {fi.LastAccessTime}");
-            Console.WriteLine($"  Last[W]riteTime : {fi.LastWriteTime}");
-            Console.WriteLine($"  Information     :");
-            Console.WriteLine($"    LinkTarget  : {fi.LinkTarget}");
-            Console.WriteLine($"    IsReadOnly  : {fi.IsReadOnly}");
-            Console.WriteLine($"    Length      : {fi.Length}");
-            Console.WriteLine($"    UnixFileMode: {fi.UnixFileMode}");
+            AnsiConsole.MarkupInterpolated($"File {fi.Name}:");
+            AnsiConsole.MarkupInterpolated($"  [C]reationTime  : {fi.CreationTime}");
+            AnsiConsole.MarkupInterpolated($"  Last[A]ccessTime: {fi.LastAccessTime}");
+            AnsiConsole.MarkupInterpolated($"  Last[W]riteTime : {fi.LastWriteTime}");
+            AnsiConsole.MarkupInterpolated($"  Information     :");
+            AnsiConsole.MarkupInterpolated($"    LinkTarget  : {fi.LinkTarget}");
+            AnsiConsole.MarkupInterpolated($"    IsReadOnly  : {fi.IsReadOnly}");
+            AnsiConsole.MarkupInterpolated($"    Length      : {fi.Length}");
+            AnsiConsole.MarkupInterpolated($"    UnixFileMode: {fi.UnixFileMode}");
         }
 
+        [Obsolete]
         public static void ChangeProperty(FileInfo fi, Func<FileInfo, DateTime> get, Action<FileInfo, DateTime> set)
         {
-            var dtFormat = "yyyy-MM-dd HH:mm:ss";
-            Console.WriteLine(get(fi).ToString(dtFormat));
+            Console.WriteLine(get(fi).ToString(DateTimeFormat));
 
             var line = Console.ReadLine();
             if (line == null) return;
 
-            if (!DateTime.TryParseExact(line, dtFormat, provider: CultureInfo.InvariantCulture, DateTimeStyles.None, out var newValue))
+            if (!DateTime.TryParseExact(line, DateTimeFormat, provider: CultureInfo.InvariantCulture, DateTimeStyles.None, out var newValue))
             {
                 Console.WriteLine("Input could not be read as a date and time. Invalid format?");
                 return;
