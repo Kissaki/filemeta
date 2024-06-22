@@ -12,12 +12,8 @@ internal static class PromptSpecifics
 
     internal static bool PromptBool(string name, string currentValue)
     {
-        return AnsiConsole.Prompt(new TextPrompt<bool>(name)
-            .PromptStyle("green")
-            .WithConverter(x => x ? "yes" : "no")
-            .AddChoices([true, false])
-            .DefaultValue(currentValue == "yes")
-            );
+        var defaultValue = currentValue == "yes";
+        return AnsiConsole.Prompt(new BoolPrompt(name) { DefaultValue = defaultValue });
     }
 
     internal static DateTime PromptDateTime(string name, string currentValue)
