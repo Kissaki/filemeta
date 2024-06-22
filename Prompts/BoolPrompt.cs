@@ -1,5 +1,6 @@
 ﻿namespace filemeta.Prompts;
 
+/// <seealso cref="ConfirmationPrompt"/>
 internal class BoolPrompt(string name) : IPrompt<bool>
 {
     public string Name { get; set; } = name;
