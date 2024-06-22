@@ -21,7 +21,11 @@ namespace filemeta
             {
                 case 0:
                     var was0 = choices[choiceIndex];
-                    fi.MoveTo(PromptFileName(was0.Name, was0.Value));
+                    var newFileName = PromptFileName(was0.Name, was0.Value);
+                    var newFilePath = Path.Combine(fi.DirectoryName ?? throw new NotImplementedException("Non-directory file paths are not supported for rename"), newFileName);
+                    fi.MoveTo(newFilePath);
+                    var newFileInfo = new FileInfo(newFilePath);
+                    AnsiConsole.MarkupLineInterpolated($"Changed {nameof(newFileInfo.Name)} to {newFileInfo.Name}");
                     break;
                 case 1:
                     var was1 = choices[choiceIndex];
