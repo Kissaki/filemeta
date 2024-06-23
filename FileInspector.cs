@@ -11,7 +11,7 @@ internal static class FileInspector
     {
         var choices = GetAttributes(fi).ToArray();
         var choice = AnsiConsole.Prompt(new SelectionPrompt<FileAttribute>()
-            .Title($"File {fi.Name} Attributes")
+            .Title(Markup.Escape($"File {fi.Name} Attributes"))
             .AddChoices(choices)
             .UseConverter(x => $"{x.Key} {x.Value}")
             );
@@ -60,7 +60,7 @@ internal static class FileInspector
 
     private static IEnumerable<FileAttribute> GetAttributes(FileInfo fi)
     {
-        yield return new(FileAttributes.FileName, fi.Name);
+        yield return new(FileAttributes.FileName, Markup.Escape(fi.Name));
         yield return new(FileAttributes.CreationTime, fi.CreationTime.ToString(DateTimeFormat));
         yield return new(FileAttributes.LastAccessTime, fi.LastAccessTime.ToString(DateTimeFormat));
         yield return new(FileAttributes.LastWriteTime, fi.LastWriteTime.ToString(DateTimeFormat));
