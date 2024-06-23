@@ -8,7 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.49.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+      <Using Include="System.Globalization" />
+      <Using Include="System.Collections.Immutable" />
+      <Using Include="Spectre.Console" />
+      <Using Include="Spectre.Console.Cli" />
+      <Using Include="filemeta.Prompts" />
   </ItemGroup>
 
 </Project>
