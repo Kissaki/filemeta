@@ -1,2 +1,4 @@
 /.vs/
 /artifacts/
+*.csproj.user
+*.pubxml.user
