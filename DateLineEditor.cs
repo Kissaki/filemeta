@@ -18,7 +18,7 @@ public class DateLineEditor
     private static string Format(DateOnly value) => value.ToString(_format, _culture);
     public static DateOnly Parse(string value) => DateOnly.ParseExact(value, _format, _culture);
 
-    private string _model = "yyyy-MM-dd";
+    private string _model;
     private int _pos;
 
     public DateLineEditor(DateOnly value)
