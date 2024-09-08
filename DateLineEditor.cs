@@ -176,10 +176,4 @@ public class DateLineEditor
             }
         }
     }
-
-    //private record Field(int Pos0, int PosEnd);
-    //private Field[] Fields = [new(0,3), new(5,6), new(8.9)];
-    //private Field GetField(int pos)
-    //private Field GetFields(int pos)
-    //private Field GetNextField(int pos)
 }
