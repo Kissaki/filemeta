@@ -26,6 +26,9 @@ internal static class FileInspector
                 AnsiConsole.MarkupLineInterpolated($"Changed {nameof(newFileInfo.Name)} to {newFileInfo.Name}");
                 break;
             case FileAttributes.CreationTime:
+                var createdPrompt = new DateLineEditor(DateOnly.FromDateTime(fi.CreationTime));
+                createdPrompt.Enter();
+                var newCreated = createdPrompt.GetValue();
                 fi.CreationTime = PromptDateTime(choice.Key.ToString(), choice.Value);
                 AnsiConsole.MarkupLineInterpolated($"Changed {nameof(fi.CreationTime)} to {fi.CreationTime}");
                 break;
