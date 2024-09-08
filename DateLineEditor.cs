@@ -16,12 +16,12 @@ public class DateLineEditor
     //                              0123456789
     private const string _format = "yyyy-MM-dd";
     private static string Format(DateOnly value) => value.ToString(_format, _culture);
-    public static DateOnly Parse(string value) => DateOnly.ParseExact(value, _format, _culture);
+    private static DateOnly Parse(string value) => DateOnly.ParseExact(value, _format, _culture);
 
     private string _model;
     private int _pos;
 
-    public DateLineEditor(DateOnly value)
+    private DateLineEditor(DateOnly value)
     {
         _model = Format(value);
     }
