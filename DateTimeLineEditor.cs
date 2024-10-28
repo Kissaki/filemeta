@@ -7,8 +7,8 @@ public class DateTimeLineEditor
 {
     public static DateTime Prompt(DateTime defaultValue)
     {
-        var edit = new DateTimeLineEditor(defaultValue);
-        edit.Enter();
+        var edit = new DateTimeLineEditor(defaultValue, Console.CursorLeft);
+        edit.EnterEditor();
         return edit.GetValue();
     }
 
@@ -20,13 +20,16 @@ public class DateTimeLineEditor
     private static DateTime Parse(string value) => DateTime.ParseExact(value, _format, _culture);
     #endregion Internal Static Formatting
 
+    // It may be a better idea to have a model of split field values - maybe even split field types that individually handle editing
     private DateTime _value;
     private string _valueText;
-    private int _pos;
+    private readonly int _editorPos;
+    private int _cursorPos;
 
-    private DateTimeLineEditor(DateTime value)
+    private DateTimeLineEditor(DateTime value, int editorPosition)
     {
         _valueText = Format(value);
+        _editorPos = editorPosition;
     }
 
     public DateTime GetValue() => DateTime.ParseExact(_valueText, _format, _culture);
@@ -45,15 +48,17 @@ public class DateTimeLineEditor
 
         _valueText = value;
 
-        var was = Console.CursorLeft;
-        // We expect to render as a line editor from pos 0
-        Console.CursorLeft = 0;
-        Console.Write(_valueText);
-        // Recover cursor position
-        Console.CursorLeft = was;
-        // Implemented around SetPos _pos - must remain consistent
+        RenderValue();
 
         SetValue(Parse(_valueText));
+    }
+
+    private void RenderValue()
+    {
+        using var cursorRecover = new CursorPosRecovery();
+
+        Console.CursorLeft = _editorPos;
+        Console.Write(_valueText);
     }
 
     private void SetChar(int index, char keyChar)
@@ -64,53 +69,25 @@ public class DateTimeLineEditor
         MovePos(1);
     }
 
-    private enum Field { Invalid, Separator, Year, Month, Day, Hour, Minute, Second, }
-    private sealed record FieldRange(Field Field, Range Range);
-    private static readonly FieldRange[] _fieldRanges = [
-        new(Field.Year, 0..4),
-        new(Field.Month, 5..7),
-        new(Field.Day, 8..10),
-        new(Field.Hour, 11..13),
-        new(Field.Minute, 14..16),
-        new(Field.Second, 17..19),
-    ];
+    private enum EditorField { Invalid, Separator, Year, Month, Day, Hour, Minute, Second, }
+    //private sealed record FieldRange(Field Field, Range Range);
+    //private static readonly FieldRange[] _fieldRanges = [
+    //    new(Field.Year, 0..4),
+    //    new(Field.Month, 5..7),
+    //    new(Field.Day, 8..10),
+    //    new(Field.Hour, 11..13),
+    //    new(Field.Minute, 14..16),
+    //    new(Field.Second, 17..19),
+    //];
 
-    private static Field GetIndexField(int index) => index switch
-    {
-        0 or 1 or 2 or 3 => Field.Year,
-        5 or 6 => Field.Month,
-        8 or 9 => Field.Day,
-        11 or 12 => Field.Hour,
-        14 or 15 => Field.Minute,
-        17 or 18 => Field.Second,
-        4 or 7 or 10 or 13 or 16 => Field.Separator,
-        _ => Field.Invalid,
-    };
-
-    private void ShiftCurrentFieldValue(int diff)
-    {
-        switch (GetIndexField(_pos))
-        {
-            case Field.Year:
-                SetValue(GetValue().AddYears(diff));
-                break;
-            case Field.Month:
-                SetValue(GetValue().AddMonths(diff));
-                break;
-            case Field.Day:
-                SetValue(GetValue().AddDays(diff));
-                break;
-            default:
-                throw new InvalidOperationException();
-        }
-    }
+    #region Movement
 
     private void SetPos(int pos)
     {
         pos %= _format.Length;
         if (pos < 0) pos = _format.Length + pos;
-        _pos = pos;
-        Console.CursorLeft = _pos;
+        _cursorPos = pos;
+        Console.CursorLeft = _cursorPos;
     }
 
     private void MovePos(int diff)
@@ -119,48 +96,12 @@ public class DateTimeLineEditor
         SetPos(newPos);
     }
 
-    public void Enter()
-    {
-        Console.Write($"{_valueText:yyyy-MM-dd}");
-        SetPos(0);
-
-        ConsoleKeyInfo input;
-        do
-        {
-            input = Console.ReadKey(intercept: true);
-
-            switch (input.Key)
-            {
-                case ConsoleKey.LeftArrow:
-                    MovePos(-1);
-                    break;
-                case ConsoleKey.RightArrow:
-                    MovePos(1);
-                    break;
-                case ConsoleKey.Tab:
-                    HandleTab(input.Modifiers);
-                    break;
-                case >= ConsoleKey.D0 and <= ConsoleKey.D9 or >= ConsoleKey.NumPad0 and ConsoleKey.NumPad9:
-                    SetChar(_pos, input.KeyChar);
-                    break;
-                case ConsoleKey.Add or ConsoleKey.OemPlus or ConsoleKey.UpArrow:
-                    ShiftCurrentFieldValue(GetShiftValue(input.Modifiers));
-                    break;
-                case ConsoleKey.Subtract or ConsoleKey.OemMinus or ConsoleKey.DownArrow:
-                    ShiftCurrentFieldValue(-GetShiftValue(input.Modifiers));
-                    break;
-            }
-
-        } while (input.Key != ConsoleKey.Enter);
-        Console.WriteLine();
-    }
-
     private int GetNextPos(int diff)
     {
         diff %= _format.Length;
 
         var direction = Math.Sign(diff);
-        var newPos = _pos + diff;
+        var newPos = _cursorPos + diff;
         var fixedPos = newPos switch
         {
             < 0 => 18,
@@ -171,8 +112,6 @@ public class DateTimeLineEditor
 
         return fixedPos;
     }
-
-    private static int GetShiftValue(ConsoleModifiers modifiers) => modifiers switch { ConsoleModifiers.Shift => 10, ConsoleModifiers.Alt => 100, _ => 1, };
 
     private void HandleTab(ConsoleModifiers modifiers)
     {
@@ -205,4 +144,91 @@ public class DateTimeLineEditor
             SetPos(nextPos);
         }
     }
+
+    #endregion Movement
+
+    #region Field Value Modification
+
+    private void ShiftCurrentFieldValue(int diff)
+    {
+        switch (GetIndexField(_cursorPos))
+        {
+            case EditorField.Year:
+                SetValue(GetValue().AddYears(diff));
+                break;
+            case EditorField.Month:
+                SetValue(GetValue().AddMonths(diff));
+                break;
+            case EditorField.Day:
+                SetValue(GetValue().AddDays(diff));
+                break;
+            case EditorField.Hour:
+                SetValue(GetValue().AddHours(diff));
+                break;
+            case EditorField.Minute:
+                SetValue(GetValue().AddMinutes(diff));
+                break;
+            case EditorField.Second:
+                SetValue(GetValue().AddSeconds(diff));
+                break;
+            default:
+                throw new InvalidOperationException();
+        }
+    }
+
+    #endregion Field Value Modification
+
+    private static EditorField GetIndexField(int index) => index switch
+    {
+        0 or 1 or 2 or 3 => EditorField.Year,
+        5 or 6 => EditorField.Month,
+        8 or 9 => EditorField.Day,
+        11 or 12 => EditorField.Hour,
+        14 or 15 => EditorField.Minute,
+        17 or 18 => EditorField.Second,
+        4 or 7 or 10 or 13 or 16 => EditorField.Separator,
+        _ => EditorField.Invalid,
+    };
+
+    #region Input Handling
+
+    public void EnterEditor()
+    {
+        Console.Write(_valueText);
+        SetPos(0);
+
+        ConsoleKeyInfo input;
+        do
+        {
+            input = Console.ReadKey(intercept: true);
+
+            switch (input.Key)
+            {
+                case ConsoleKey.LeftArrow:
+                    MovePos(-1);
+                    break;
+                case ConsoleKey.RightArrow:
+                    MovePos(1);
+                    break;
+                case ConsoleKey.Tab:
+                    HandleTab(input.Modifiers);
+                    break;
+                case >= ConsoleKey.D0 and <= ConsoleKey.D9 or >= ConsoleKey.NumPad0 and ConsoleKey.NumPad9:
+                    SetChar(_cursorPos, input.KeyChar);
+                    break;
+                case ConsoleKey.Add or ConsoleKey.OemPlus or ConsoleKey.UpArrow:
+                    ShiftCurrentFieldValue(GetShiftValue(input.Modifiers));
+                    break;
+                case ConsoleKey.Subtract or ConsoleKey.OemMinus or ConsoleKey.DownArrow:
+                    ShiftCurrentFieldValue(-GetShiftValue(input.Modifiers));
+                    break;
+            }
+
+        } while (input.Key != ConsoleKey.Enter);
+        Console.WriteLine();
+    }
+
+    private static int GetShiftValue(ConsoleModifiers modifiers) => modifiers switch { ConsoleModifiers.Shift => 10, ConsoleModifiers.Alt => 100, _ => 1, };
+
+    #endregion Input Handling
 }
