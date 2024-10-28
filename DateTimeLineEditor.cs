@@ -213,7 +213,7 @@ public class DateTimeLineEditor
                 case ConsoleKey.Tab:
                     HandleTab(input.Modifiers);
                     break;
-                case >= ConsoleKey.D0 and <= ConsoleKey.D9 or >= ConsoleKey.NumPad0 and ConsoleKey.NumPad9:
+                case >= ConsoleKey.D0 and <= ConsoleKey.D9 or >= ConsoleKey.NumPad0 and <= ConsoleKey.NumPad9:
                     SetChar(_cursorPos, input.KeyChar);
                     break;
                 case ConsoleKey.Add or ConsoleKey.OemPlus or ConsoleKey.UpArrow:
