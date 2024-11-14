@@ -1,4 +1,7 @@
-﻿namespace filemeta;
+﻿using filemeta.Prompts;
+using Spectre.Console;
+
+namespace filemeta;
 
 internal static class PromptSpecifics
 {

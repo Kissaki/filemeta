@@ -1,4 +1,5 @@
-﻿using static filemeta.PromptSpecifics;
+﻿using Spectre.Console;
+using static filemeta.PromptSpecifics;
 
 namespace filemeta;
 

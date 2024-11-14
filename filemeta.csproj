@@ -14,9 +14,6 @@
   <ItemGroup>
       <Using Include="System.Globalization" />
       <Using Include="System.Collections.Immutable" />
-      <Using Include="Spectre.Console" />
-      <Using Include="Spectre.Console.Cli" />
-      <Using Include="filemeta.Prompts" />
   </ItemGroup>
 
 </Project>
