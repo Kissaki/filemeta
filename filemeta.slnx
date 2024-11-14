@@ -1,6 +1,6 @@
 <Solution>
-  <Folder Name="/docs/" Id="c8a102e2-5182-49d1-9a1e-304c18445447">
-    <File Path="mvp.md" />
+  <Folder Name="/Solution Items/docs/" Id="cc6d240a-0ece-4d12-99e1-c0f457e1de5a">
+    <File Path="docs/mvp.md" />
   </Folder>
   <Project Path="filemeta.csproj" />
 </Solution>
