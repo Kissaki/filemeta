@@ -1,7 +1,7 @@
-﻿using filemeta.Prompts;
+﻿using filemeta.SpectreIntegrations.Prompts;
 using Spectre.Console;
 
-namespace filemeta;
+namespace filemeta.SpectreIntegrations;
 
 internal static class PromptSpecifics
 {

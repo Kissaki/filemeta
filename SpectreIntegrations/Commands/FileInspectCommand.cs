@@ -1,6 +1,6 @@
 ﻿using Spectre.Console.Cli;
 
-namespace filemeta.Commands;
+namespace filemeta.SpectreIntegrations.Commands;
 
 internal sealed class FileInspectCommand : AsyncCommand<FileInspectCommandSettings>
 {

@@ -1,6 +1,6 @@
 ﻿using Spectre.Console;
 
-namespace filemeta.Prompts;
+namespace filemeta.SpectreIntegrations.Prompts;
 
 /// <seealso cref="ConfirmationPrompt"/>
 internal class BoolPrompt(string name) : IPrompt<bool>

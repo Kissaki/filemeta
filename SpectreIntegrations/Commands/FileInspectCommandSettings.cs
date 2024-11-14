@@ -1,7 +1,7 @@
 ﻿using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace filemeta.Commands;
+namespace filemeta.SpectreIntegrations.Commands;
 
 internal class FileInspectCommandSettings : CommandSettings
 {

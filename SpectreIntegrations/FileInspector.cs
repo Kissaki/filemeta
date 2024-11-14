@@ -1,7 +1,7 @@
 ﻿using Spectre.Console;
-using static filemeta.PromptSpecifics;
+using static filemeta.SpectreIntegrations.PromptSpecifics;
 
-namespace filemeta;
+namespace filemeta.SpectreIntegrations;
 
 internal static class FileInspector
 {

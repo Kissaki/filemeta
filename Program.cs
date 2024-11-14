@@ -1,5 +1,4 @@
 ﻿using filemeta;
-using filemeta.Commands;
 
 //var date = DateLineEditor.Prompt(DateOnly.FromDateTime(DateTime.Now));
 //Console.WriteLine($"Result: {date}");
@@ -7,6 +6,6 @@ using filemeta.Commands;
 var datetime = DateTimeLineEditor.Prompt(defaultValue: DateTime.Now);
 Console.WriteLine($"Result: {datetime}");
 
-var app = new Spectre.Console.Cli.CommandApp<FileInspectCommand>();
+//var app = new Spectre.Console.Cli.CommandApp<filemeta.SpectreIntegrations.Commands.FileInspectCommand>();
 //app.Configure(c => c.PropagateExceptions());
-return await app.RunAsync(args);
+//return await app.RunAsync(args);
